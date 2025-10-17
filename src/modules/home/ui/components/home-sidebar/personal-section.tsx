@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
 const items = [
   {
@@ -27,10 +28,14 @@ const items = [
     title: "All playlists",
     url: "/playlist",
     icon: ListVideoIcon,
+    auth: true,
   },
 ];
 
 export const PersonalSection = () => {
+  const clerk = useClerk();
+  const { isSignedIn } = useAuth();
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>You</SidebarGroupLabel>
@@ -42,7 +47,12 @@ export const PersonalSection = () => {
                 tooltip={item.title}
                 asChild
                 isActive={false} //TODO: Change to look at current pathname
-                onClick={() => {}} //TODO: Do something onClick
+                onClick={(e) => {
+                  if (!isSignedIn && item.auth) {
+                    e.preventDefault();
+                    return clerk.openSignIn();
+                  }
+                }} //TODO: Do something onClick
               >
                 <Link href={item.url}>
                   <item.icon />
